@@ -109,9 +109,7 @@ export default function HeroSection({ onOpenChat }: HeroSectionProps) {
       {/* Content */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto fade-in-up">
         <div className="max-w-4xl">
-          <span className="block text-[10px] uppercase tracking-widest text-white/60 font-sans mb-6">
-            Liquid AI &middot; LFM2 Agent
-          </span>
+
 
           <h1
             ref={h1Ref}
