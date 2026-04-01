@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { detectDeviceAction, executeDeviceAction } from "./DeviceActions";
 
 interface Message {
   id: string;
@@ -127,6 +128,42 @@ export default function ChatPanel({ open, onClose }: ChatPanelProps) {
     setIsLoading(true);
 
     try {
+      // Check for device actions first (execute on-device)
+      const deviceAction = detectDeviceAction(userMessage.content);
+      if (deviceAction) {
+        const result = await executeDeviceAction(deviceAction, userMessage.content);
+        
+        if (result.data === "DOWNLOAD_CHAT") {
+          // Special case: download chat history
+          const chatText = messages.map(m => `[${m.role}] ${m.content}`).join("\n\n");
+          const blob = new Blob([chatText], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "novera-chat.txt";
+          a.click();
+          URL.revokeObjectURL(url);
+          setMessages((prev) => [...prev, {
+            id: generateId(),
+            role: "assistant",
+            content: "Chat history downloaded as novera-chat.txt",
+            timestamp: new Date(),
+          }]);
+          setIsLoading(false);
+          return;
+        }
+
+        const statusIcon = result.success ? "**[Action Executed]**" : "**[Action Failed]**";
+        setMessages((prev) => [...prev, {
+          id: generateId(),
+          role: "assistant",
+          content: `${statusIcon}\n\n${result.data}`,
+          timestamp: new Date(),
+        }]);
+        setIsLoading(false);
+        return;
+      }
+
       const contextMessages = [
         { role: "system" as const, content: SYSTEM_PROMPT },
         ...(deviceInfo
@@ -247,10 +284,12 @@ export default function ChatPanel({ open, onClose }: ChatPanelProps) {
   };
 
   const quickActions = [
-    { label: "Open Terminal", icon: ">_", prompt: "How do I open a terminal on my current OS?" },
-    { label: "Take Screenshot", icon: "[]", prompt: "How do I take a screenshot on this device?" },
-    { label: "File Manager", icon: "F", prompt: "Help me navigate the file manager on my OS" },
-    { label: "System Info", icon: "i", prompt: "Show me how to check my system information" },
+    { label: "Device Info", icon: "i", prompt: "Check my device info" },
+    { label: "Battery", icon: "B", prompt: "Check battery status" },
+    { label: "Network", icon: "N", prompt: "Check network status" },
+    { label: "Location", icon: "G", prompt: "What is my location?" },
+    { label: "Screen", icon: "S", prompt: "Check screen info" },
+    { label: "Time", icon: "T", prompt: "What time is it?" },
   ];
 
   if (!open) return null;
