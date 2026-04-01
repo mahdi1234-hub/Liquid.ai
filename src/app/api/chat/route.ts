@@ -79,35 +79,55 @@ async function knowledgeAgent(userMsg: string, history: ChatMessage[]): Promise<
     return stream("Take care! I'll be here whenever you need help.");
   }
 
-  // 3. Math solver
+  // 3. Math solver (instant, no search needed)
   const mathResult = solveMath(msg);
   if (mathResult) return stream(mathResult);
 
-  // 4. Creative writing (check before code to avoid "write a poem" matching code)
+  // 4. ALWAYS search Wikipedia + DuckDuckGo for EVERY query
+  // Start search immediately (runs in parallel with local checks)
+  const knowledgePromise = fetchKnowledge(msg);
+
+  // 5. Creative writing (check before code)
   if (isCreativeRequest(lmsg)) {
-    return stream(generateCreative(msg, lmsg));
+    // Still include search results if relevant
+    const knowledge = await knowledgePromise;
+    const creative = generateCreative(msg, lmsg);
+    if (knowledge && knowledge.length > 100) {
+      return stream(`${creative}\n\n---\n**Research context from web:**\n${knowledge.substring(0, 400)}`);
+    }
+    return stream(creative);
   }
 
-  // 5. Code generation
+  // 6. Code generation
   if (isCodeRequest(lmsg)) {
-    return stream(generateCode(msg));
+    const knowledge = await knowledgePromise;
+    const codeResponse = generateCode(msg);
+    if (knowledge && knowledge.length > 100) {
+      return stream(`${codeResponse}\n\n---\n**Additional context from web search:**\n${knowledge.substring(0, 400)}`);
+    }
+    return stream(codeResponse);
   }
 
-  // 6. For everything else: search Wikipedia + DuckDuckGo for knowledge
-  const knowledge = await fetchKnowledge(msg);
+  // 7. Wait for search results (for all other queries)
+  const knowledge = await knowledgePromise;
   
   if (knowledge && knowledge.length > 50) {
-    // Format knowledge into a proper response
     const response = formatKnowledgeResponse(msg, knowledge);
     return stream(response);
   }
 
-  // 6. Pattern-based responses for common topics
+  // 8. If Wikipedia/DuckDuckGo returned nothing, try broader search
+  const broadResults = await fetchBroadSearch(msg);
+  if (broadResults && broadResults.length > 50) {
+    return stream(formatKnowledgeResponse(msg, broadResults));
+  }
+
+  // 9. Pattern-based responses as last resort
   const patternResponse = patternMatch(msg, lmsg);
   if (patternResponse) return stream(patternResponse);
 
-  // 7. Generic helpful response
-  return stream(`That's an interesting question about "${msg.length > 80 ? msg.substring(0, 80) + "..." : msg}".\n\nI wasn't able to find specific information on this exact topic in my knowledge sources. Here's what I suggest:\n\n1. **Rephrase your question** with more specific keywords\n2. **Ask about a related topic** I might have better coverage on\n3. **Try breaking it down** into smaller, more specific questions\n\nI work best with questions about technology, science, programming, math, history, geography, and general knowledge. What else can I help with?`);
+  // 10. Last resort - transparent about what happened
+  return stream(`I searched Wikipedia and DuckDuckGo for "${msg.length > 60 ? msg.substring(0, 60) + "..." : msg}" but didn't find specific results for this exact query.\n\nHere's what you can try:\n- **Use more specific keywords** (e.g., "quantum computing" instead of "tell me about stuff")\n- **Ask about a well-known topic** -- I have access to all of Wikipedia\n- **Try a different angle** -- rephrase your question\n\nI search the web in real-time for every query you send. Some very niche or ambiguous queries may need refinement.`);
 }
 
 // --- Knowledge Retrieval ---
@@ -173,6 +193,50 @@ async function fetchKnowledge(query: string): Promise<string> {
   }
 
   return results.join("\n\n");
+}
+
+async function fetchBroadSearch(query: string): Promise<string> {
+  // Try DuckDuckGo with simplified terms
+  const simpleTerms = query
+    .replace(/[?!.,;:'"]/g, "")
+    .split(/\s+/)
+    .filter(w => w.length > 3)
+    .slice(0, 4)
+    .join(" ");
+  
+  if (!simpleTerms) return "";
+
+  try {
+    // Try Wikipedia with simplified terms
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(simpleTerms)}&format=json&srlimit=3&origin=*`;
+    const res = await fetch(searchUrl, { signal: AbortSignal.timeout(5000) });
+    
+    if (res.ok) {
+      const data = await res.json();
+      const titles = data.query?.search?.map((r: { title: string }) => r.title) || [];
+      const results: string[] = [];
+
+      for (const title of titles.slice(0, 2)) {
+        try {
+          const summaryRes = await fetch(
+            `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,
+            { signal: AbortSignal.timeout(3000) }
+          );
+          if (summaryRes.ok) {
+            const sData = await summaryRes.json();
+            if (sData.extract && sData.extract.length > 30) {
+              results.push(`**${sData.title}**\n${sData.extract}`);
+            }
+          }
+        } catch { continue; }
+      }
+
+      if (results.length > 0) return results.join("\n\n");
+    }
+  } catch {
+    // Broad search failed
+  }
+  return "";
 }
 
 function extractSearchTerms(query: string): string {
