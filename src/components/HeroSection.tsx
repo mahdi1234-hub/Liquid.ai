@@ -145,10 +145,7 @@ export default function HeroSection({ onOpenChat }: HeroSectionProps) {
             </span>
           </h1>
 
-          <p className="text-white/90 text-sm md:text-base font-sans font-light mb-12 max-w-lg">
-            Your on-device AI agent powered by Liquid AI&rsquo;s open-source LFM2
-            model. Interact with any device, any OS -- right from your browser.
-          </p>
+
 
           {/* Search Bar / Action Bar */}
           <div
