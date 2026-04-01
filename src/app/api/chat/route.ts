@@ -83,12 +83,17 @@ async function knowledgeAgent(userMsg: string, history: ChatMessage[]): Promise<
   const mathResult = solveMath(msg);
   if (mathResult) return stream(mathResult);
 
-  // 4. Code generation
+  // 4. Creative writing (check before code to avoid "write a poem" matching code)
+  if (isCreativeRequest(lmsg)) {
+    return stream(generateCreative(msg, lmsg));
+  }
+
+  // 5. Code generation
   if (isCodeRequest(lmsg)) {
     return stream(generateCode(msg));
   }
 
-  // 5. For everything else: search Wikipedia + DuckDuckGo for knowledge
+  // 6. For everything else: search Wikipedia + DuckDuckGo for knowledge
   const knowledge = await fetchKnowledge(msg);
   
   if (knowledge && knowledge.length > 50) {
@@ -404,6 +409,30 @@ function generateFileCode(lang: string): string {
 
 function generateGenericCode(lang: string, msg: string): string {
   return `I'd be happy to write **${lang}** code for you!\n\nBased on your request: "${msg}"\n\nHere's a starting template:\n\n\`\`\`${lang}\n// TODO: Implement based on your specific requirements\n// Tell me more details about what you need:\n// - What input does it take?\n// - What output should it produce?\n// - Any specific libraries or frameworks?\n\`\`\`\n\nI can generate code for:\n- **Web apps** (React, Next.js, Express, Django)\n- **APIs** (REST, GraphQL, WebSocket)\n- **Algorithms** (sorting, searching, graphs)\n- **Database** operations (SQL, ORM)\n- **Authentication** (JWT, OAuth)\n- **File operations** (read, write, parse)\n- **Games** (canvas, terminal)\n\nJust describe what you need more specifically!`;
+}
+
+// --- Creative Writing ---
+
+function isCreativeRequest(msg: string): boolean {
+  return /\b(write|compose|draft|create|generate)\s+(a\s+|an\s+|me\s+)?(poem|story|email|letter|essay|article|haiku|sonnet|limerick|song|lyrics|blog|speech|joke)/i.test(msg) ||
+    /\b(poem|story|essay|haiku|sonnet|limerick|lyrics)\b.*\b(about|for|on)\b/i.test(msg);
+}
+
+function generateCreative(msg: string, lmsg: string): string {
+  if (/poem|poetry|haiku|sonnet|verse/i.test(lmsg)) {
+    const topic = msg.replace(/^.*?(about|on|for)\s+/i, "").replace(/[?.!]+$/, "").trim() || "the world";
+    return `Here's a poem about **${topic}**:\n\n---\n\n**${topic.charAt(0).toUpperCase() + topic.slice(1)}**\n\nIn circuits deep and pathways bright,\nWhere data flows like streams of light,\n${topic} unfolds its mystery,\nA thread within our history.\n\nFrom humble roots to soaring heights,\nThrough darkened rooms and neon nights,\nWe shape the world with careful hands,\nAnd dream of more than what now stands.\n\nSo let us pause and wonder still,\nAt nature's art and human will,\nFor in the dance of old and new,\nThe beauty lies in what is true.\n\n---\n\nWant me to try a different style (haiku, limerick, sonnet, free verse) or a different theme?`;
+  }
+  if (/story|tale|narrative/i.test(lmsg)) {
+    return `**The Last Signal**\n\nThe radio crackled to life at 3:47 AM. Dr. Elena Vasquez nearly knocked over her cold coffee reaching for the headphones.\n\nFor eleven years, the deep space antenna had listened to nothing but cosmic static. Funding was being cut next month. Her team of twelve had dwindled to three.\n\nBut this signal was different. It wasn't random noise. It pulsed with mathematical precision -- prime numbers, then the Fibonacci sequence, then something she'd never seen before.\n\n"Maria, wake up. You need to see this."\n\nHer colleague stumbled in, still half-asleep, but one look at the waveform display snapped her awake. "That's... that's not natural."\n\n"No," Elena whispered, her hands trembling. "It's not."\n\nThe final sequence decoded into coordinates -- not pointing outward into space, but inward. To a location on Earth. A cave in southern France that wouldn't be excavated for another twenty years.\n\nThe message wasn't from aliens.\n\nIt was from us. From the future.\n\n---\n\nWant me to continue this story, or create one with a different genre or theme?`;
+  }
+  if (/email/i.test(lmsg)) {
+    return `**Professional Email Template:**\n\n---\n\n**Subject:** [Clear, specific subject line]\n\nDear [Name],\n\nI hope this message finds you well. I'm writing to [state your purpose clearly].\n\n[Paragraph 2: Key details, context, or supporting information]\n\n[Paragraph 3: Specific request, next steps, or call to action]\n\nPlease let me know if you have any questions. I'm happy to discuss further at your convenience.\n\nBest regards,\n[Your name]\n[Your title/position]\n[Contact information]\n\n---\n\n**Tips:** Keep subject lines under 50 characters. Lead with the important info. Use short paragraphs.\n\nTell me the specific situation and I'll customize this!`;
+  }
+  if (/joke/i.test(lmsg)) {
+    return `Here are a few jokes:\n\n**Programming:**\nWhy do programmers prefer dark mode?\nBecause light attracts bugs.\n\n**AI:**\nAn AI walks into a bar.\nThe bartender says, "What'll you have?"\nThe AI says, "What's everyone else having?"\n\n**Tech:**\nThere are only 10 types of people in the world:\nThose who understand binary, and those who don't.\n\n**Classic:**\nWhy did the developer go broke?\nBecause he used up all his cache.\n\nWant more jokes on a specific topic?`;
+  }
+  return `I'd love to help with creative writing! Tell me:\n\n1. **Type:** poem, story, email, essay, article, joke, song lyrics\n2. **Topic/Theme:** What it should be about\n3. **Tone:** Formal, casual, humorous, dramatic, inspirational\n4. **Length:** Short, medium, or detailed\n\nAnd I'll create it for you!`;
 }
 
 // --- Pattern Matching for Common Topics ---
