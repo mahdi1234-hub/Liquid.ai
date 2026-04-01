@@ -249,7 +249,7 @@ function generateGreeting(os: string): string {
 
 function answerQuestion(msg: string, os: string): string {
   // AI/ML questions
-  if (/\b(artificial intelligence|ai|machine learning|ml|deep learning|neural network|llm|large language model|gpt|transformer)\b/i.test(msg)) {
+  if (/\b(artificial intelligence|ai|machine learning|ml|deep learning|neural network|llm|large language model|gpt|transformer|koog|liquid\s*ai|lfm|novera|agent\s*framework)\b/i.test(msg)) {
     if (/what\s*is\s*(ai|artificial intelligence)/i.test(msg)) {
       return `**Artificial Intelligence (AI)** is a branch of computer science focused on creating systems that can perform tasks that typically require human intelligence.\n\nKey areas include:\n\n- **Machine Learning (ML)** -- Systems that learn from data without explicit programming\n- **Deep Learning** -- Neural networks with multiple layers for complex pattern recognition\n- **Natural Language Processing (NLP)** -- Understanding and generating human language\n- **Computer Vision** -- Interpreting visual information from images/video\n- **Robotics** -- Physical systems that interact with the real world\n\n**Modern AI models like LFM2** (which powers this agent's architecture) use novel approaches beyond traditional transformers, achieving faster inference and better efficiency for on-device deployment.\n\nWould you like me to dive deeper into any specific area?`;
     }
