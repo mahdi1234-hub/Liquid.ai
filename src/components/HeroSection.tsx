@@ -86,8 +86,8 @@ export default function HeroSection({ onOpenChat }: HeroSectionProps) {
     }
   };
 
-  const words1 = ["Sanctuary", "in", "the"];
-  const words2 = ["Heart", "of", "Montreal."];
+  const words1 = ["Welcome", "to", "your"];
+  const words2 = ["Private", "Assistant."];
 
   return (
     <header
@@ -155,58 +155,10 @@ export default function HeroSection({ onOpenChat }: HeroSectionProps) {
             ref={searchBarRef}
             className="mt-16 bg-white/10 backdrop-blur-md border border-white/20 rounded-[2px] px-8 py-6 flex flex-col md:flex-row items-center gap-6 max-w-5xl opacity-0 translate-y-10 scale-95 origin-center"
           >
-            <div className="w-full md:flex-1 group cursor-pointer">
-              <span className="block text-white/50 text-[10px] uppercase tracking-widest mb-2 group-hover:text-white transition-colors duration-300">
-                Model
+            <div className="w-full md:flex-1 flex items-center justify-center">
+              <span className="text-white/70 text-sm font-light tracking-wider">
+                Made With Love By Louati Mahdi
               </span>
-              <div className="flex items-center justify-between border-b border-white/20 pb-2 group-hover:border-white transition-colors duration-300">
-                <span className="text-white text-sm font-light">
-                  LFM2 (Liquid)
-                </span>
-                <svg className="w-4 h-4 text-white/70 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="w-full md:flex-1 group cursor-pointer">
-              <span className="block text-white/50 text-[10px] uppercase tracking-widest mb-2 group-hover:text-white transition-colors duration-300">
-                Capability
-              </span>
-              <div className="flex items-center justify-between border-b border-white/20 pb-2 group-hover:border-white transition-colors duration-300">
-                <span className="text-white text-sm font-light">
-                  Computer Use
-                </span>
-                <svg className="w-4 h-4 text-white/70 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="w-full md:flex-1 group cursor-pointer">
-              <span className="block text-white/50 text-[10px] uppercase tracking-widest mb-2 group-hover:text-white transition-colors duration-300">
-                Platform
-              </span>
-              <div className="flex items-center justify-between border-b border-white/20 pb-2 group-hover:border-white transition-colors duration-300">
-                <span className="text-white text-sm font-light">
-                  Any Device
-                </span>
-                <svg className="w-4 h-4 text-white/70 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="w-full md:flex-1 group cursor-pointer">
-              <span className="block text-white/50 text-[10px] uppercase tracking-widest mb-2 group-hover:text-white transition-colors duration-300">
-                Status
-              </span>
-              <div className="flex items-center justify-between border-b border-white/20 pb-2 group-hover:border-white transition-colors duration-300">
-                <span className="text-white text-sm font-light">
-                  Ready
-                </span>
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              </div>
             </div>
 
             <div className="w-full md:w-auto mt-4 md:mt-0">
