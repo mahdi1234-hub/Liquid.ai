@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.LiquidAgent" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">#A68B6A</item>
+        <item name="android:colorPrimaryDark">#1C1917</item>
+        <item name="android:colorAccent">#A68B6A</item>
+        <item name="android:statusBarColor">#1C1917</item>
+        <item name="android:navigationBarColor">#1C1917</item>
+        <item name="android:windowBackground">#1C1917</item>
+    </style>
+</resources>

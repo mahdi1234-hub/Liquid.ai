@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const LIQUID_API_URL =
-  process.env.LIQUID_API_URL || "https://api.liquid.ai/v1/chat/completions";
-const LIQUID_API_KEY = process.env.LIQUID_API_KEY || "";
+  process.env.LIQUID_API_URL || "https://openrouter.ai/api/v1/chat/completions";
+const LIQUID_API_KEY = process.env.LIQUID_API_KEY || process.env.OPENROUTER_API_KEY || "";
 const LIQUID_MODEL = process.env.LIQUID_MODEL || "liquid/lfm2";
 
 interface ChatMessage {
