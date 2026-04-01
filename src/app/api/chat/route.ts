@@ -414,8 +414,9 @@ function generateGenericCode(lang: string, msg: string): string {
 // --- Creative Writing ---
 
 function isCreativeRequest(msg: string): boolean {
-  return /\b(write|compose|draft|create|generate)\s+(a\s+|an\s+|me\s+)?(poem|story|email|letter|essay|article|haiku|sonnet|limerick|song|lyrics|blog|speech|joke)/i.test(msg) ||
-    /\b(poem|story|essay|haiku|sonnet|limerick|lyrics)\b.*\b(about|for|on)\b/i.test(msg);
+  return /\b(write|compose|draft|create|generate)\s+(a\s+|an?\s+|me\s+|me\s+a\s+|some\s+)?(poem|story|email|letter|essay|article|haiku|sonnet|limerick|song|lyrics|blog|speech|joke|riddle|quote)/i.test(msg) ||
+    /\b(poem|story|essay|haiku|sonnet|limerick|lyrics|joke)\b.*\b(about|for|on)\b/i.test(msg) ||
+    /\b(tell\s+me\s+a\s+joke|make\s+me\s+laugh|funny)\b/i.test(msg);
 }
 
 function generateCreative(msg: string, lmsg: string): string {
